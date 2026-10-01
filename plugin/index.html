@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      color: var(--uxp-host-text-color);
+      background-color: var(--uxp-host-background-color);
+      font-size: var(--uxp-host-font-size);
+      padding: 10px;
+      margin: 0;
+    }
+    h2 { font-size: 13px; margin: 0 0 8px 0; }
+    .row { display: flex; align-items: center; margin-bottom: 6px; }
+    .row label { flex: 1; }
+    .row input[type="text"], .row input[type="number"] { width: 90px; }
+    .ext input { width: 100%; }
+    button { margin-right: 6px; margin-bottom: 8px; }
+    #folder { margin: 4px 0 10px 0; word-break: break-all; opacity: 0.8; }
+    #list { border: 1px solid var(--uxp-host-border-color); max-height: 260px; overflow-y: auto; margin-bottom: 8px; }
+    .seq { display: flex; padding: 4px 6px; border-bottom: 1px solid var(--uxp-host-border-color); }
+    .seq input { margin-right: 6px; }
+    .seq .meta { opacity: 0.7; font-size: 11px; }
+    .warn { color: #e8a33d; }
+    .err { color: #e5534b; }
+    .ok { color: #57ab5a; }
+    #log { font-size: 11px; white-space: pre-wrap; max-height: 140px; overflow-y: auto; opacity: 0.9; }
+    .empty { padding: 8px; opacity: 0.6; }
+  </style>
+</head>
+<body>
+  <h2>Bildsequenzen importieren</h2>
+
+  <button id="pick">Ordner wählen…</button>
+  <button id="rescan" disabled>Neu scannen</button>
+  <div id="folder">Kein Ordner gewählt</div>
+
+  <div class="row"><label for="bins">Ordnerstruktur als Bins nachbilden</label><input type="checkbox" id="bins" checked></div>
+  <div class="row"><label for="rename">Clips nach Sequenz benennen</label><input type="checkbox" id="rename" checked></div>
+  <div class="row"><label for="gaps">Bei Lücken in mehrere Clips teilen</label><input type="checkbox" id="gaps" checked></div>
+  <div class="row"><label for="fps">Bildrate (leer = Premiere-Voreinstellung)</label><input type="text" id="fps" value="25"></div>
+  <div class="row"><label for="minframes">Mindestanzahl Bilder</label><input type="number" id="minframes" value="3" min="1"></div>
+  <div class="row ext"><input type="text" id="exts" title="Erlaubte Dateiendungen, durch Komma getrennt"></div>
+
+  <div id="list"><div class="empty">Noch nichts gefunden.</div></div>
+
+  <button id="all" disabled>Alle</button>
+  <button id="none" disabled>Keine</button>
+  <button id="import" disabled>Importieren</button>
+
+  <div id="log"></div>
+
+  <script src="main.js"></script>
+</body>
+</html>
