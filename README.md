@@ -19,6 +19,8 @@ Optionen im Panel:
 | Clips nach Sequenz benennen | an | Clip heißt `intro` statt `intro_0001.png`. Besteht der Name nur aus Ziffern, wird der Ordnername verwendet. |
 | Bei Lücken in mehrere Clips teilen | an | Fehlen z. B. Bild 6 und 7, entstehen `name_teil1` (1–5) und `name_teil2` (8–12). Aus: eine Sequenz mit Warnung. |
 | Bildrate | 25 | Setzt die Bildrate jedes Clips. Leer lassen, um Premieres Voreinstellung „Unbestimmte Medien-Zeitbasis“ zu nutzen. Kommazahlen wie `23,976` gehen. |
+| Danach als Film in neue Sequenz legen | aus | Legt alle importierten Clips in der Reihenfolge der Liste lückenlos hintereinander in eine neue Sequenz und öffnet sie im Schnittfenster. Die Sequenzeinstellungen (Auflösung, Bildrate) übernimmt Premiere vom ersten Clip. Die Sequenz liegt im obersten Bin. |
+| Name der Sequenz | Ordnername | Name der neuen Sequenz. |
 | Pause zwischen Importen | 300 ms | Wartezeit nach jedem Clip, damit Premiere den Import abschließen kann. Name und Bildrate werden erst gesetzt, wenn alle Clips importiert sind. |
 | Mindestanzahl Bilder | 3 | Kürzere Nummernfolgen (z. B. `logo1.png`) werden ignoriert. |
 | Dateiendungen | png, jpg, jpeg, tif, tiff, exr, dpx, tga, bmp, psd, gif, heic, heif | Nur diese Formate werden berücksichtigt. |

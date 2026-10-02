@@ -89,7 +89,9 @@ function readOptions() {
     makeBins: $("bins").checked,
     rename: $("rename").checked,
     fps: fps && fps > 0 ? fps : null,
-    pause: Math.max(0, parseInt($("pause").value, 10) || 0)
+    pause: Math.max(0, parseInt($("pause").value, 10) || 0),
+    makeSequence: $("makeseq").checked,
+    sequenceName: $("seqname").value.trim()
   };
 }
 
@@ -334,6 +336,33 @@ async function importSelected() {
     }
   }
 
+  // Optional: alle Clips in der Reihenfolge der Liste nacheinander in eine neue Sequenz legen.
+  if (opts.makeSequence && toSetUp.length) {
+    const seqName = opts.sequenceName || (rootFolder && rootFolder.name) || "Bildsequenzen";
+    try {
+      await sleep(opts.pause);
+      await writeFileLog(`START Sequenz „${seqName}“ mit ${toSetUp.length} Clip(s)`);
+      const targetBin = opts.makeBins && todo.length ? await binFor([todo[0].binPath[0]]) : root;
+      const sequence = await project.createSequenceFromMedia(
+        seqName,
+        toSetUp.map((t) => t.clip),
+        asProjectItem(targetBin)
+      );
+      if (!sequence) throw new Error("Premiere hat keine Sequenz angelegt");
+      await writeFileLog(`OK    Sequenz „${seqName}“`);
+      try {
+        await project.openSequence(sequence);
+      } catch (e) {
+        // Öffnen ist nur Komfort; die Sequenz liegt in jedem Fall im Projekt.
+      }
+      log(`✓ Sequenz „${seqName}“ mit ${toSetUp.length} Clip(s) angelegt`, "ok");
+    } catch (e) {
+      const msg = e && e.message ? e.message : String(e);
+      await writeFileLog(`FEHLER Sequenz: ${msg}`);
+      log(`✗ Sequenz „${seqName}“: ${msg}`, "err");
+    }
+  }
+
   await writeFileLog(`ENDE ${okCount} von ${todo.length} importiert`);
   log(`Fertig: ${okCount} von ${todo.length} importiert.`, okCount === todo.length ? "ok" : "warn");
   $("import").disabled = false;
@@ -346,6 +375,7 @@ $("pick").addEventListener("click", async () => {
   if (!folder || !folder.isFolder) return;
   rootFolder = folder;
   $("folder").textContent = folder.nativePath;
+  $("seqname").placeholder = folder.name;
   await scan();
 });
 

@@ -116,6 +116,7 @@ Prüfe außerdem:
 
 - Häkchen **Bei Lücken in mehrere Clips teilen** entfernen: Das Panel scannt neu, statt `shot_teil1/2` steht nur noch `shot` mit dem Hinweis „3 Bild(er) fehlen“.
 - **Mindestanzahl Bilder** auf `30` setzen: Nur noch `intro` (48) und `cam` (72) bleiben übrig.
+- **Danach als Film in neue Sequenz legen** anhaken und importieren: Premiere legt zusätzlich die Sequenz `Testdaten` an und öffnet sie im Schnittfenster. Darin liegen die 7 Clips nacheinander, in der Reihenfolge der Liste: intro, shot_teil1, shot_teil2, cam, Detail, a, b. Unter **Name der Sequenz** kannst du einen eigenen Namen eintragen.
 - **Pause zwischen Importen** (Standard 300 ms): gibt Premiere nach jedem Clip Zeit. Bei Abstürzen mit vielen oder großen Sequenzen erhöhen.
 - **Bildrate** leeren: Premiere nimmt seine Voreinstellung (*Einstellungen › Medien › Unbestimmte Medien-Zeitbasis*).
 - **Ordnerstruktur als Bins nachbilden** ausschalten: Alle Clips landen direkt im Projektstamm.
