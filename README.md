@@ -2,6 +2,8 @@
 
 Ein UXP-Panel für Premiere Pro, das einen Ordner samt aller Unterordner durchsucht, nummerierte Einzelbildsequenzen erkennt und jede als Videoclip importiert.
 
+**Schritt-für-Schritt zum Aufrufen und Testen: [ANLEITUNG.md](ANLEITUNG.md)**
+
 ## Was das Plugin macht
 
 - Ordner wählen, das Plugin scannt rekursiv alle Unterordner.
@@ -64,6 +66,9 @@ plugin/
   icons/          Panel- und Plugin-Symbol
 test/
   sequences.test.js   Tests der Erkennung: node test/sequences.test.js
+  Testdaten.zip       Beispielordner mit 7 Bildsequenzen für den Test in Premiere
+  make_testdata.py    erzeugt die Testdaten neu (python3 test/make_testdata.py <Ziel>)
+ANLEITUNG.md          Schritt-für-Schritt-Anleitung zum Laden und Testen
 ```
 
 ## Stand der Tests
