@@ -9,6 +9,18 @@ let found = [];        // [{ seq, binPath: [..], checked }]
 
 $("exts").value = DEFAULT_EXTENSIONS.join(", ");
 
+// Premiere stellt (noch) keine Theme-CSS-Variablen bereit, daher Theme selbst abfragen.
+function applyTheme(theme) {
+  const t = theme === "light" || theme === "lightest" ? "light" : "dark";
+  document.body.className = `theme-${t}`;
+}
+try {
+  applyTheme(document.theme && document.theme.getCurrent ? document.theme.getCurrent() : "dark");
+  if (document.theme && document.theme.onUpdated) document.theme.onUpdated.addListener(applyTheme);
+} catch (e) {
+  applyTheme("dark");
+}
+
 // ---------- Protokoll ----------
 
 function log(msg, cls) {
@@ -23,6 +35,47 @@ function clearLog() {
   $("log").innerHTML = "";
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// ---------- Protokolldatei ----------
+// Wird vor jedem riskanten Schritt auf die Platte geschrieben. Stürzt Premiere ab,
+// zeigt das Panel beim nächsten Start, bei welcher Sequenz es passiert ist.
+
+const LOG_FILE = "import-protokoll.txt";
+let fileLog = [];
+
+async function dataFolder() {
+  return uxp.storage.localFileSystem.getDataFolder();
+}
+
+async function writeFileLog(line) {
+  fileLog.push(`${new Date().toISOString()}  ${line}`);
+  try {
+    const folder = await dataFolder();
+    const file = await folder.createFile(LOG_FILE, { overwrite: true });
+    await file.write(fileLog.join("\n") + "\n");
+  } catch (e) {
+    console.log("Protokolldatei nicht schreibbar", e);
+  }
+}
+
+async function checkPreviousRun() {
+  try {
+    const folder = await dataFolder();
+    const file = await folder.getEntry(LOG_FILE);
+    const text = await file.read();
+    const lines = text.trim().split("\n");
+    const last = lines[lines.length - 1] || "";
+    if (last.includes("START ")) {
+      log("Der letzte Import wurde nicht beendet (Absturz?). Letzter Schritt:", "err");
+      log(last.replace(/^\S+\s+START\s+/, ""), "err");
+      log(`Protokoll: ${file.nativePath}`, "warn");
+    }
+  } catch (e) {
+    // Noch kein Protokoll vorhanden
+  }
+}
+
 // ---------- Ordner scannen ----------
 
 function readOptions() {
@@ -35,7 +88,8 @@ function readOptions() {
     splitGaps: $("gaps").checked,
     makeBins: $("bins").checked,
     rename: $("rename").checked,
-    fps: fps && fps > 0 ? fps : null
+    fps: fps && fps > 0 ? fps : null,
+    pause: Math.max(0, parseInt($("pause").value, 10) || 0)
   };
 }
 
@@ -76,7 +130,10 @@ async function scan() {
   const opts = readOptions();
   found = [];
   log("Scanne…");
+  fileLog = [];
+  await writeFileLog(`START Scan ${rootFolder.nativePath}`);
   await scanFolder(rootFolder, [rootFolder.name], opts, found);
+  await writeFileLog(`OK    Scan: ${found.length} Sequenz(en)`);
   render();
   log(`${found.length} Sequenz(en) gefunden.`, found.length ? "ok" : "warn");
 }
@@ -217,41 +274,67 @@ async function importSelected() {
     return parent;
   }
 
+  fileLog = [];
+  await writeFileLog(`Import von ${todo.length} Sequenz(en), Bildrate ${opts.fps || "Voreinstellung"}, Bins ${opts.makeBins ? "an" : "aus"}`);
+
   let okCount = 0;
-  for (const item of todo) {
+  const toSetUp = [];
+  for (let i = 0; i < todo.length; i++) {
+    const item = todo[i];
     const s = item.seq;
+    const label = `${i + 1}/${todo.length} ${item.binPath.join(" / ")} / ${s.name}`;
     try {
       const bin = await binFor(item.binPath);
       const before = await itemIds(bin);
 
+      log(`… ${label} (${s.frameCount} Bilder)`);
+      await writeFileLog(`START ${label} | ${s.frameCount} Bilder ${s.ext} | ${s.firstPath}`);
       const imported = await project.importFiles([s.firstPath], true, asProjectItem(bin), true);
       if (!imported) throw new Error("Premiere hat den Import abgelehnt");
+      await writeFileLog(`OK    ${label}`);
 
-      // Neu hinzugekommenen Clip im Ziel-Bin suchen, um ihn zu benennen und die Bildrate zu setzen.
+      // Neu hinzugekommenen Clip im Ziel-Bin merken, um ihn danach zu benennen und die Bildrate zu setzen.
       const newItems = [];
       for (const pi of await bin.getItems()) {
         if (!before.has(String(await pi.getId()))) newItems.push(pi);
       }
       const clip = newItems.map(asClip).find(Boolean);
+      if (clip) toSetUp.push({ clip, s, label });
+      else log(`Hinweis: importierter Clip für „${s.name}“ nicht gefunden, Name/Bildrate unverändert.`, "warn");
 
-      if (clip && (opts.rename || opts.fps)) {
+      okCount++;
+      log(`✓ ${label}`, "ok");
+    } catch (e) {
+      const msg = e && e.message ? e.message : String(e);
+      await writeFileLog(`FEHLER ${label}: ${msg}`);
+      log(`✗ ${label}: ${msg}`, "err");
+    }
+    // Premiere Zeit geben, den Import abzuschließen, bevor der nächste startet.
+    await sleep(opts.pause);
+  }
+
+  // Umbenennen und Bildrate erst setzen, wenn alle Importe durch sind.
+  if (opts.rename || opts.fps) {
+    for (const { clip, s, label } of toSetUp) {
+      try {
+        await writeFileLog(`START Einrichten ${label}`);
         runTransaction(project, `Sequenz „${s.name}“ einrichten`, () => {
           const actions = [];
           if (opts.fps) actions.push(clip.createSetOverrideFrameRateAction(opts.fps));
           if (opts.rename) actions.push(clip.createSetNameAction(s.name));
           return actions;
         });
-      } else if (!clip) {
-        log(`Hinweis: importierter Clip für „${s.name}“ nicht gefunden, Name/Bildrate unverändert.`, "warn");
+        await writeFileLog(`OK    Einrichten ${label}`);
+      } catch (e) {
+        const msg = e && e.message ? e.message : String(e);
+        await writeFileLog(`FEHLER Einrichten ${label}: ${msg}`);
+        log(`✗ Einrichten ${s.name}: ${msg}`, "err");
       }
-
-      okCount++;
-      log(`✓ ${item.binPath.join(" / ")} / ${s.name} (${s.frameCount} Bilder)`, "ok");
-    } catch (e) {
-      log(`✗ ${s.name}: ${e && e.message ? e.message : e}`, "err");
+      await sleep(50);
     }
   }
 
+  await writeFileLog(`ENDE ${okCount} von ${todo.length} importiert`);
   log(`Fertig: ${okCount} von ${todo.length} importiert.`, okCount === todo.length ? "ok" : "warn");
   $("import").disabled = false;
 }
@@ -272,3 +355,5 @@ for (const id of ["gaps", "minframes", "exts"]) $(id).addEventListener("change",
 $("all").addEventListener("click", () => { found.forEach((f) => (f.checked = true)); render(); });
 $("none").addEventListener("click", () => { found.forEach((f) => (f.checked = false)); render(); });
 $("import").addEventListener("click", importSelected);
+
+checkPreviousRun();

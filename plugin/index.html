@@ -3,32 +3,47 @@
 <head>
   <meta charset="utf-8">
   <style>
-    body {
-      color: var(--uxp-host-text-color);
-      background-color: var(--uxp-host-background-color);
-      font-size: var(--uxp-host-font-size);
-      padding: 10px;
-      margin: 0;
+    /* Premiere bietet keine Theme-Variablen; Farben werden je nach Theme über die Body-Klasse gesetzt. */
+    body.theme-dark {
+      --text: #e6e6e6;
+      --muted: #a8a8a8;
+      --bg: #232323;
+      --border: #4a4a4a;
+      --row: #2c2c2c;
     }
+    body.theme-light {
+      --text: #1e1e1e;
+      --muted: #555555;
+      --bg: #f0f0f0;
+      --border: #c4c4c4;
+      --row: #e4e4e4;
+    }
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+    body { color: var(--text); background-color: var(--bg); font-size: 12px; }
+    .scroll { height: 100%; overflow-y: scroll; padding: 10px; box-sizing: border-box; }
+    h2, label, div, span { color: var(--text); }
     h2 { font-size: 13px; margin: 0 0 8px 0; }
     .row { display: flex; align-items: center; margin-bottom: 6px; }
     .row label { flex: 1; }
     .row input[type="text"], .row input[type="number"] { width: 90px; }
     .ext input { width: 100%; }
     button { margin-right: 6px; margin-bottom: 8px; }
-    #folder { margin: 4px 0 10px 0; word-break: break-all; opacity: 0.8; }
-    #list { border: 1px solid var(--uxp-host-border-color); max-height: 260px; overflow-y: auto; margin-bottom: 8px; }
-    .seq { display: flex; padding: 4px 6px; border-bottom: 1px solid var(--uxp-host-border-color); }
+    #folder { margin: 4px 0 10px 0; word-break: break-all; color: var(--muted); }
+    #list { border: 1px solid var(--border); margin-bottom: 8px; }
+    .seq { display: flex; padding: 4px 6px; border-bottom: 1px solid var(--border); }
+    .seq:nth-child(even) { background-color: var(--row); }
     .seq input { margin-right: 6px; }
-    .seq .meta { opacity: 0.7; font-size: 11px; }
-    .warn { color: #e8a33d; }
-    .err { color: #e5534b; }
-    .ok { color: #57ab5a; }
-    #log { font-size: 11px; white-space: pre-wrap; max-height: 140px; overflow-y: auto; opacity: 0.9; }
-    .empty { padding: 8px; opacity: 0.6; }
+    .seq .meta { color: var(--muted); font-size: 11px; }
+    #log div { font-size: 11px; }
+    .warn, .seq .meta.warn, #log .warn { color: #e8a33d; }
+    .err, #log .err { color: #f0685f; }
+    .ok, #log .ok { color: #6bc46d; }
+    #log { white-space: pre-wrap; margin-top: 4px; }
+    .empty { padding: 8px; color: var(--muted); }
   </style>
 </head>
-<body>
+<body class="theme-dark">
+<div class="scroll">
   <h2>Bildsequenzen importieren</h2>
 
   <button id="pick">Ordner wählen…</button>
@@ -40,6 +55,7 @@
   <div class="row"><label for="gaps">Bei Lücken in mehrere Clips teilen</label><input type="checkbox" id="gaps" checked></div>
   <div class="row"><label for="fps">Bildrate (leer = Premiere-Voreinstellung)</label><input type="text" id="fps" value="25"></div>
   <div class="row"><label for="minframes">Mindestanzahl Bilder</label><input type="number" id="minframes" value="3" min="1"></div>
+  <div class="row"><label for="pause">Pause zwischen Importen (ms)</label><input type="number" id="pause" value="300" min="0"></div>
   <div class="row ext"><input type="text" id="exts" title="Erlaubte Dateiendungen, durch Komma getrennt"></div>
 
   <div id="list"><div class="empty">Noch nichts gefunden.</div></div>
@@ -49,6 +65,7 @@
   <button id="import" disabled>Importieren</button>
 
   <div id="log"></div>
+</div>
 
   <script src="main.js"></script>
 </body>

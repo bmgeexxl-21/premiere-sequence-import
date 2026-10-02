@@ -19,8 +19,11 @@ Optionen im Panel:
 | Clips nach Sequenz benennen | an | Clip heißt `intro` statt `intro_0001.png`. Besteht der Name nur aus Ziffern, wird der Ordnername verwendet. |
 | Bei Lücken in mehrere Clips teilen | an | Fehlen z. B. Bild 6 und 7, entstehen `name_teil1` (1–5) und `name_teil2` (8–12). Aus: eine Sequenz mit Warnung. |
 | Bildrate | 25 | Setzt die Bildrate jedes Clips. Leer lassen, um Premieres Voreinstellung „Unbestimmte Medien-Zeitbasis“ zu nutzen. Kommazahlen wie `23,976` gehen. |
+| Pause zwischen Importen | 300 ms | Wartezeit nach jedem Clip, damit Premiere den Import abschließen kann. Name und Bildrate werden erst gesetzt, wenn alle Clips importiert sind. |
 | Mindestanzahl Bilder | 3 | Kürzere Nummernfolgen (z. B. `logo1.png`) werden ignoriert. |
 | Dateiendungen | png, jpg, jpeg, tif, tiff, exr, dpx, tga, bmp, psd, gif, heic, heif | Nur diese Formate werden berücksichtigt. |
+
+Jeder Import-Schritt wird vorher in `import-protokoll.txt` im Datenordner des Plugins geschrieben. Stürzt Premiere ab, zeigt das Panel beim nächsten Öffnen, bei welcher Sequenz es passiert ist.
 
 Versteckte Dateien und macOS-Reste (`.DS_Store`, `._datei.png`) werden übersprungen.
 

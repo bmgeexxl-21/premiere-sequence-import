@@ -70,7 +70,7 @@ Im Panel sollten jetzt **7 Sequenzen** stehen:
 | Name | Ort | Bilder | Was getestet wird |
 |---|---|---|---|
 | intro | Testdaten | 48 | Sequenz im obersten Ordner; `notiz.txt` daneben wird ignoriert |
-| shot_teil1 | Testdaten / Luecke | 10 | Lücke in der Nummerierung (Bild 11–13 fehlen) |
+| shot_teil1 | Testdaten / Luecke | 10 | Lücke in der Nummerierung (Bild 11–13 fehlen); gewollt zwei Clips, abschaltbar mit „Bei Lücken in mehrere Clips teilen“ |
 | shot_teil2 | Testdaten / Luecke | 17 | zweiter Teil nach der Lücke |
 | cam | Testdaten / Szene1 | 72 | Unterordner |
 | Detail | Testdaten / Szene1 / Detail | 24 | Unter-Unterordner; Dateien heißen nur `0001.png`, deshalb Ordnername als Clipname |
@@ -116,6 +116,7 @@ Prüfe außerdem:
 
 - Häkchen **Bei Lücken in mehrere Clips teilen** entfernen: Das Panel scannt neu, statt `shot_teil1/2` steht nur noch `shot` mit dem Hinweis „3 Bild(er) fehlen“.
 - **Mindestanzahl Bilder** auf `30` setzen: Nur noch `intro` (48) und `cam` (72) bleiben übrig.
+- **Pause zwischen Importen** (Standard 300 ms): gibt Premiere nach jedem Clip Zeit. Bei Abstürzen mit vielen oder großen Sequenzen erhöhen.
 - **Bildrate** leeren: Premiere nimmt seine Voreinstellung (*Einstellungen › Medien › Unbestimmte Medien-Zeitbasis*).
 - **Ordnerstruktur als Bins nachbilden** ausschalten: Alle Clips landen direkt im Projektstamm.
 - Zum Wiederholen vorher die Bins im Projektfenster löschen, sonst entstehen doppelte Clips.
@@ -133,6 +134,7 @@ Danach mit deinem echten Material testen.
 | Panel ist leer oder weiß | Im UXP Developer Tool **••• › Debug** öffnen. Unter *Console* stehen die Fehlermeldungen. |
 | „Kein Projekt geöffnet.“ | Erst in Premiere ein Projekt öffnen, dann importieren. |
 | Ein Clip hat ✗ im Protokoll | Den Text der Zeile kopieren und mir schicken. |
+| Premiere stürzt beim Import ab | Premiere neu starten und das Panel öffnen. Oben im Protokoll steht dann rot, bei welcher Sequenz der Absturz passiert ist, und wo die Datei `import-protokoll.txt` liegt. Diese Datei bitte schicken. Zum Eingrenzen nur diese eine Sequenz anhaken und importieren, oder die **Pause zwischen Importen** auf z. B. `1000` erhöhen. |
 | Clip zeigt nur ein Standbild | Bitte melden, mit dem Dateinamen des ersten Bildes. |
 
 Nach Änderungen an `manifest.json` im UXP Developer Tool erst **Unload**, dann wieder **Load** klicken. Bei Änderungen an anderen Dateien reicht **Reload**, mit *Load & Watch* passiert das automatisch.
